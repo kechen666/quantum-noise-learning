@@ -156,3 +156,33 @@ def fit_iws_lambda(list_m, statistics_counts_list: List[dict], num_qubits: int, 
         lambda_list.append(popt[1])
 
     return lambda_list
+
+def eigenvalue_list_to_pauli_probability(lst):
+    # 将实数列表转换为概率值
+    probabilities = np.array(lst, dtype=np.float64)
+    # make sure is >=0
+    if np.min(probabilities) < 0:
+        probabilities = probabilities - np.min(probabilities)
+        
+    # 归一化概率值
+    sum_probabilities = np.sum(probabilities)
+    
+    if sum_probabilities != 0:
+        probabilities = probabilities / sum_probabilities    
+    return probabilities
+
+# 二进制表示
+def to_binary_string(number, length: int):
+    return format(number, '0' + str(length) + 'b')
+
+def pauli_probability_to_qubit_error_rate(num_qubits, probabilities):
+    qubit_error_rates = []
+    for index in range(num_qubits-1, -1,-1):
+        qubit_error_rate = 0
+        # for qubit
+        for i in range(2**num_qubits):
+            # for seq
+            if to_binary_string(i, num_qubits)[index] == "1":
+                qubit_error_rate += probabilities[i]
+        qubit_error_rates.append(qubit_error_rate)
+    return qubit_error_rates
